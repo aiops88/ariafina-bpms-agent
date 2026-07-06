@@ -11,7 +11,7 @@
     {
       "name": "MyAgent",
       "build": "CodeZip",
-      "entrypoint": "main.py",
+      "entrypoint": "agent.py",
       "codeLocation": "app/MyAgent/",
       "runtimeVersion": "PYTHON_3_14",
       "networkMode": "PUBLIC",
