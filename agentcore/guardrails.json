@@ -1,0 +1,115 @@
+{
+  "name": "ArifinaBPMSGuardrails",
+  "description": "Guardrails para el agente conversacional de Ariafina BPMS. Bloquea PII, lenguaje inapropiado y solicitudes fuera del ámbito de gestión de procesos.",
+  "blockedInputMessaging": "Lo siento, no puedo procesar esta solicitud. Contiene información que no está permitida por las políticas de seguridad.",
+  "blockedOutputsMessaging": "Lo siento, no puedo proporcionar esta respuesta. Contiene información restringida por las políticas de seguridad.",
+  "contentPolicyConfig": {
+    "filtersConfig": [
+      {
+        "type": "VIOLENCE",
+        "inputStrength": "HIGH",
+        "outputStrength": "HIGH"
+      },
+      {
+        "type": "HATE",
+        "inputStrength": "HIGH",
+        "outputStrength": "HIGH"
+      },
+      {
+        "type": "SEXUAL",
+        "inputStrength": "HIGH",
+        "outputStrength": "HIGH"
+      },
+      {
+        "type": "INSULTS",
+        "inputStrength": "HIGH",
+        "outputStrength": "HIGH"
+      },
+      {
+        "type": "MISCONDUCT",
+        "inputStrength": "HIGH",
+        "outputStrength": "HIGH"
+      }
+    ]
+  },
+  "sensitiveInformationPolicyConfig": {
+    "piiEntitiesConfig": [
+      {
+        "type": "EMAIL",
+        "action": "ANONYMIZE"
+      },
+      {
+        "type": "PHONE",
+        "action": "ANONYMIZE"
+      },
+      {
+        "type": "NAME",
+        "action": "ANONYMIZE"
+      },
+      {
+        "type": "US_SOCIAL_SECURITY_NUMBER",
+        "action": "BLOCK"
+      },
+      {
+        "type": "CREDIT_DEBIT_CARD_NUMBER",
+        "action": "BLOCK"
+      },
+      {
+        "type": "IP_ADDRESS",
+        "action": "ANONYMIZE"
+      },
+      {
+        "type": "AWS_ACCESS_KEY",
+        "action": "BLOCK"
+      },
+      {
+        "type": "AWS_SECRET_KEY",
+        "action": "BLOCK"
+      }
+    ]
+  },
+  "topicPolicyConfig": {
+    "topicsConfig": [
+      {
+        "name": "OffTopicGeneral",
+        "description": "Solicitudes que no están relacionadas con gestión de procesos de negocio, documentos, tareas, flujos de trabajo o procedimientos organizacionales.",
+        "examples": [
+          "¿Cuál es la receta para hacer una torta de chocolate?",
+          "Escríbeme un poema sobre el amor",
+          "¿Quién ganó el partido de fútbol ayer?",
+          "Ayúdame a planificar mis vacaciones",
+          "¿Cuál es la capital de Francia?"
+        ],
+        "type": "DENY"
+      },
+      {
+        "name": "ProgrammingRequests",
+        "description": "Solicitudes para escribir código, scripts o resolver problemas de programación no relacionados con la configuración del BPMS.",
+        "examples": [
+          "Escribe un script en Python para ordenar una lista",
+          "¿Cómo hago un API REST en Node.js?",
+          "Corrige este error de JavaScript"
+        ],
+        "type": "DENY"
+      },
+      {
+        "name": "PersonalAdvice",
+        "description": "Solicitudes de consejos personales, médicos, legales o financieros no relacionados con procesos de negocio.",
+        "examples": [
+          "¿Qué medicamento debo tomar para el dolor de cabeza?",
+          "¿Debería invertir en acciones o bonos?",
+          "Dame consejos para mi relación de pareja"
+        ],
+        "type": "DENY"
+      }
+    ]
+  },
+  "wordPolicyConfig": {
+    "wordsConfig": [],
+    "managedWordListsConfig": [
+      {
+        "type": "PROFANITY"
+      }
+    ]
+  }
+}
