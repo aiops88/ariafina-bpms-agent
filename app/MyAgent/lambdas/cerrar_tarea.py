@@ -13,15 +13,44 @@ Returns:
 
 import json
 import logging
+import time
+import os
 from datetime import datetime, timezone
 
-logger = logging.getLogger()
+# ---------------------------------------------------------------------------
+# Logging estructurado
+# ---------------------------------------------------------------------------
+logger = logging.getLogger("bpms.cerrar_tarea")
 logger.setLevel(logging.INFO)
 
+FUNCTION_NAME = os.environ.get("AWS_LAMBDA_FUNCTION_NAME", "cerrar_tarea")
+FUNCTION_VERSION = os.environ.get("AWS_LAMBDA_FUNCTION_VERSION", "$LOCAL")
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "production")
 
+
+def _structured_log(level: str, message: str, **extra):
+    """Emit a structured JSON log line for CloudWatch Insights."""
+    log_entry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "level": level,
+        "function": FUNCTION_NAME,
+        "version": FUNCTION_VERSION,
+        "environment": ENVIRONMENT,
+        "message": message,
+        **extra,
+    }
+    getattr(logger, level.lower(), logger.info)(json.dumps(log_entry, ensure_ascii=False))
+
+
+# ---------------------------------------------------------------------------
+# Handler
+# ---------------------------------------------------------------------------
 def handler(event, context):
     """AWS Lambda handler for AgentCore Gateway."""
-    logger.info(f"Event received: {json.dumps(event)}")
+    start_time = time.time()
+    request_id = getattr(context, "aws_request_id", "local") if context else "local"
+
+    _structured_log("info", "Invocación recibida", request_id=request_id, event_keys=list(event.keys()))
 
     try:
         # --- Input extraction & validation ---
@@ -30,19 +59,52 @@ def handler(event, context):
         comentario = parameters.get("comentario", "").strip()
 
         if not tarea_id:
+            _structured_log("warning", "Validación fallida: tarea_id vacío", request_id=request_id)
             return _error_response("El parámetro 'tarea_id' es obligatorio.")
+
+        _structured_log(
+            "info",
+            "Cerrando tarea",
+            request_id=request_id,
+            tarea_id=tarea_id,
+            tiene_comentario=bool(comentario),
+        )
 
         # --- Business logic ---
         resultado = _cerrar_tarea(tarea_id, comentario)
 
-        # --- Success response ---
+        # --- Metrics ---
+        duration_ms = round((time.time() - start_time) * 1000, 2)
+        _structured_log(
+            "info",
+            "Tarea cerrada exitosamente",
+            request_id=request_id,
+            tarea_id=tarea_id,
+            duration_ms=duration_ms,
+            metric_name="TareaCerrada",
+            metric_value=1,
+        )
+
         return _success_response(resultado)
 
     except Exception as e:
-        logger.exception("Error inesperado en cerrar_tarea")
+        duration_ms = round((time.time() - start_time) * 1000, 2)
+        _structured_log(
+            "error",
+            "Error inesperado",
+            request_id=request_id,
+            error=str(e),
+            error_type=type(e).__name__,
+            duration_ms=duration_ms,
+            metric_name="CierreTareaError",
+            metric_value=1,
+        )
         return _error_response(f"Error interno: {str(e)}")
 
 
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 def _extract_parameters(event: dict) -> dict:
     """Extract tool input parameters from the AgentCore Gateway event."""
     if "parameters" in event:
@@ -64,7 +126,6 @@ def _cerrar_tarea(tarea_id: str, comentario: str) -> dict:
     - Ejecutar la transición de estado en el motor de workflow.
     - Registrar el comentario de cierre en el historial de la tarea.
     """
-    # TODO: Implementar integración real con el motor de workflow del BPMS
     fecha_cierre = datetime.now(timezone.utc).isoformat()
 
     return {

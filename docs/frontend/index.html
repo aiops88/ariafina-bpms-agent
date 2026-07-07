@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ariafina BPMS — Asistente Virtual</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a365d 0%, #2d5a87 100%);
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        .header .subtitle {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+        .header .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+        }
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #48bb78;
+            animation: pulse 2s infinite;
+        }
+        .status-dot.offline { background: #f56565; animation: none; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Login */
+        .login-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .login-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+        }
+        .login-card h2 {
+            color: #1a365d;
+            margin-bottom: 8px;
+        }
+        .login-card p {
+            color: #718096;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: #4a5568;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #2d5a87;
+            box-shadow: 0 0 0 3px rgba(45,90,135,0.1);
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #1a365d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #2d5a87; }
+        .btn:disabled { background: #a0aec0; cursor: not-allowed; }
+        .error-msg {
+            color: #e53e3e;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            display: none;
+        }
+
+        /* Chat */
+        .chat-container {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 16px;
+        }
+        .chat-container.active { display: flex; }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+        .message.user { align-self: flex-end; flex-direction: row-reverse; }
+        .message.assistant { align-self: flex-start; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .message.user .message-avatar {
+            background: #ebf4ff;
+            color: #2d5a87;
+        }
+        .message.assistant .message-avatar {
+            background: #1a365d;
+            color: white;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .message.user .message-bubble {
+            background: #2d5a87;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .message.assistant .message-bubble {
+            background: white;
+            color: #2d3748;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .message-bubble pre {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 8px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .typing-indicator.active { display: flex; gap: 4px; align-items: center; }
+        .typing-indicator span {
+            width: 8px; height: 8px;
+            background: #a0aec0;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Input area */
+        .input-area {
+            padding: 16px 0 24px;
+            display: flex;
+            gap: 12px;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            background: white;
+            transition: border-color 0.2s;
+        }
+        .input-area input:focus {
+            outline: none;
+            border-color: #2d5a87;
+            box-shadow: 0 0 0 3px rgba(45,90,135,0.1);
+        }
+        .input-area button {
+            padding: 14px 24px;
+            background: #1a365d;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .input-area button:hover { background: #2d5a87; }
+        .input-area button:disabled { background: #a0aec0; cursor: not-allowed; }
+
+        /* Quick actions */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 8px 0;
+        }
+        .quick-action {
+            padding: 8px 14px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quick-action:hover {
+            background: #ebf4ff;
+            border-color: #2d5a87;
+            color: #1a365d;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .message { max-width: 90%; }
+            .header h1 { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h1>🏢 Ariafina BPMS</h1>
+            <div class="subtitle">Asistente Virtual de Gestión de Procesos</div>
+        </div>
+        <div class="status" id="connectionStatus">
+            <span class="status-dot offline"></span>
+            <span>Desconectado</span>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div class="login-container" id="loginScreen">
+        <div class="login-card">
+            <h2>Iniciar Sesión</h2>
+            <p>Ingresa tus credenciales para acceder al asistente BPMS.</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" placeholder="usuario@ariafina.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn" id="loginBtn">Ingresar</button>
+                <p class="error-msg" id="loginError"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chat Screen -->
+    <div class="chat-container" id="chatScreen">
+        <div class="messages" id="messages">
+            <div class="message assistant">
+                <div class="message-avatar">AI</div>
+                <div class="message-bubble">
+                    ¡Hola! Soy el asistente virtual de Ariafina BPMS. Puedo ayudarte a:
+                    <br><br>
+                    • Consultar el estado de procesos<br>
+                    • Identificar tipos documentales<br>
+                    • Cerrar tareas pendientes<br>
+                    • Responder preguntas sobre procedimientos
+                    <br><br>
+                    ¿En qué puedo ayudarte hoy?
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <span></span><span></span><span></span>
+        </div>
+
+        <div class="quick-actions">
+            <div class="quick-action" onclick="sendQuickAction('¿Cuál es el estado del proceso PROC-2024-001?')">📋 Estado de proceso</div>
+            <div class="quick-action" onclick="sendQuickAction('Identifica el tipo documental para un acta de comité directivo')">📄 Tipo documental</div>
+            <div class="quick-action" onclick="sendQuickAction('Cierra la tarea TASK-5012 con comentario: Documentos verificados')">✅ Cerrar tarea</div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Escribe tu consulta..." autocomplete="off">
+            <button id="sendBtn" onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+    // =========================================================================
+    // CONFIGURACIÓN
+    // =========================================================================
+    const CONFIG = {
+        COGNITO_REGION: 'us-east-1',
+        USER_POOL_ID: 'us-east-1_mgbNyQYnd',
+        CLIENT_ID: '3alvujai8q7lv51on73p1da0i3',
+        AGENT_ENDPOINT: 'https://bedrock-agentcore.us-east-1.amazonaws.com/runtimes/arn%3Aaws%3Abedrock-agentcore%3Aus-east-1%3A145405817802%3Aruntime%2Fariafinabpmsagent_MyAgent-dalPn7CeJ3/invocations',
+    };
+
+    let authToken = null;
+    let sessionId = null;
+
+    // =========================================================================
+    // AUTENTICACIÓN (Cognito USER_PASSWORD_AUTH)
+    // =========================================================================
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const errorEl = document.getElementById('loginError');
+        const btn = document.getElementById('loginBtn');
+
+        btn.disabled = true;
+        btn.textContent = 'Autenticando...';
+        errorEl.style.display = 'none';
+
+        try {
+            const response = await fetch(
+                `https://cognito-idp.${CONFIG.COGNITO_REGION}.amazonaws.com/`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-amz-json-1.1',
+                        'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth',
+                    },
+                    body: JSON.stringify({
+                        AuthFlow: 'USER_PASSWORD_AUTH',
+                        ClientId: CONFIG.CLIENT_ID,
+                        AuthParameters: {
+                            USERNAME: email,
+                            PASSWORD: password,
+                        },
+                    }),
+                }
+            );
+
+            const data = await response.json();
+
+            if (data.AuthenticationResult) {
+                authToken = data.AuthenticationResult.IdToken;
+                sessionId = crypto.randomUUID();
+                showChat();
+            } else if (data.__type && data.__type.includes('NotAuthorizedException')) {
+                throw new Error('Credenciales incorrectas');
+            } else if (data.__type && data.__type.includes('UserNotFoundException')) {
+                throw new Error('Usuario no encontrado');
+            } else {
+                throw new Error(data.message || 'Error de autenticación');
+            }
+        } catch (err) {
+            errorEl.textContent = err.message;
+            errorEl.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Ingresar';
+        }
+    });
+
+    // =========================================================================
+    // CHAT
+    // =========================================================================
+    function showChat() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('chatScreen').classList.add('active');
+        document.querySelector('.status-dot').classList.remove('offline');
+        document.querySelector('.status span:last-child').textContent = 'Conectado';
+        document.getElementById('messageInput').focus();
+    }
+
+    function addMessage(text, role) {
+        const messagesEl = document.getElementById('messages');
+        const avatar = role === 'user' ? 'Tú' : 'AI';
+
+        const messageHtml = `
+            <div class="message ${role}">
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-bubble">${formatMessage(text)}</div>
+            </div>
+        `;
+        messagesEl.insertAdjacentHTML('beforeend', messageHtml);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function formatMessage(text) {
+        // Format JSON blocks
+        text = text.replace(/```json\n?([\s\S]*?)```/g, '<pre>$1</pre>');
+        // Format inline code
+        text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // Format newlines
+        text = text.replace(/\n/g, '<br>');
+        return text;
+    }
+
+    function showTyping(show) {
+        document.getElementById('typingIndicator').classList.toggle('active', show);
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+        addMessage(text, 'user');
+        showTyping(true);
+
+        try {
+            const response = await invokeAgent(text);
+            showTyping(false);
+            addMessage(response, 'assistant');
+        } catch (err) {
+            showTyping(false);
+            addMessage(`⚠️ Error: ${err.message}`, 'assistant');
+        }
+    }
+
+    function sendQuickAction(text) {
+        document.getElementById('messageInput').value = text;
+        sendMessage();
+    }
+
+    // Enter key sends message
+    document.getElementById('messageInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // =========================================================================
+    // AGENT INVOCATION
+    // =========================================================================
+    async function invokeAgent(prompt) {
+        // If no auth token (demo mode), simulate response
+        if (!authToken) {
+            return simulateResponse(prompt);
+        }
+
+        const response = await fetch(CONFIG.AGENT_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({
+                prompt: prompt,
+                sessionId: sessionId,
+            }),
+        });
+
+        if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`HTTP ${response.status}: ${err}`);
+        }
+
+        // Process streaming response
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            fullText += extractText(chunk);
+        }
+
+        return fullText || 'Respuesta procesada correctamente.';
+    }
+
+    function extractText(chunk) {
+        // Parse AgentCore streaming events
+        try {
+            const lines = chunk.split('\n').filter(l => l.trim());
+            let text = '';
+            for (const line of lines) {
+                const parsed = JSON.parse(line);
+                const delta = parsed?.event?.contentBlockDelta?.delta?.text;
+                if (delta) text += delta;
+            }
+            return text;
+        } catch {
+            return '';
+        }
+    }
+
+    // =========================================================================
+    // DEMO MODE (simula respuestas sin backend)
+    // =========================================================================
+    function simulateResponse(prompt) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const lower = prompt.toLowerCase();
+
+                if (lower.includes('estado') && lower.includes('proceso')) {
+                    resolve(`He consultado el estado del proceso solicitado:\n\n` +
+                        `📋 **Proceso:** PROC-2024-001\n` +
+                        `📌 **Estado:** En curso\n` +
+                        `📍 **Etapa actual:** Revisión documental\n` +
+                        `👤 **Responsable:** Juan Pérez\n` +
+                        `📅 **Fecha inicio:** 15/06/2026\n` +
+                        `⏰ **Fecha límite:** 10/07/2026\n` +
+                        `📊 **Progreso:** 65%`);
+                } else if (lower.includes('tipo documental') || lower.includes('identifica')) {
+                    resolve(`He clasificado el documento según la Tabla de Retención Documental:\n\n` +
+                        `📄 **Tipo documental:** Acta de reunión\n` +
+                        `🏷️ **Código:** TRD-AC-003\n` +
+                        `📂 **Serie:** Actas\n` +
+                        `📁 **Subserie:** Actas de comité\n` +
+                        `🗄️ **Retención gestión:** 5 años\n` +
+                        `🏛️ **Retención central:** 10 años\n` +
+                        `♻️ **Disposición final:** Conservación total`);
+                } else if (lower.includes('cerrar') || lower.includes('tarea')) {
+                    resolve(`✅ La tarea ha sido cerrada exitosamente:\n\n` +
+                        `🎫 **Tarea:** TASK-5012\n` +
+                        `📌 **Estado:** Cerrada\n` +
+                        `💬 **Comentario:** Documentos verificados\n` +
+                        `📅 **Fecha cierre:** ${new Date().toLocaleString('es-CO')}\n` +
+                        `👤 **Cerrada por:** Asistente BPMS`);
+                } else {
+                    resolve(`Entiendo tu consulta. Para ayudarte mejor, puedo:\n\n` +
+                        `1. **Consultar estado de procesos** — dime el ID del proceso\n` +
+                        `2. **Identificar tipos documentales** — describe el documento\n` +
+                        `3. **Cerrar tareas** — indica el ID de la tarea\n\n` +
+                        `¿Cuál necesitas?`);
+                }
+            }, 1200);
+        });
+    }
+
+    // =========================================================================
+    // DEMO MODE AUTO-START (sin login requerido para demo)
+    // =========================================================================
+    // Para demo: descomentar la siguiente línea para saltar login
+    // showChat();
+    </script>
+</body>
+</html>

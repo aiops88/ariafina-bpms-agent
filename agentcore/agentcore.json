@@ -25,9 +25,16 @@
   "onlineEvalConfigs": [],
   "agentCoreGateways": [
     {
-      "name": "BPMSGateway",
+      "name": "BPMSGatewayAuth",
       "description": "Gateway para herramientas BPMS de Ariafina - consulta de procesos, tipología documental y cierre de tareas",
       "protocolType": "MCP",
+      "authorizerType": "CUSTOM_JWT",
+      "authorizerConfiguration": {
+        "customJwtAuthorizer": {
+          "discoveryUrl": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_mgbNyQYnd/.well-known/openid-configuration",
+          "allowedClients": ["3alvujai8q7lv51on73p1da0i3"]
+        }
+      },
       "targets": [
         {
           "name": "consultar-estado-proceso",

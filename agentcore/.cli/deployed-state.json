@@ -11,26 +11,26 @@
         },
         "mcp": {
           "gateways": {
-            "BPMSGateway": {
-              "gatewayId": "ariafinabpmsagent-bpmsgateway-dntrqz92tu",
-              "gatewayArn": "arn:aws:bedrock-agentcore:us-east-1:145405817802:gateway/ariafinabpmsagent-bpmsgateway-dntrqz92tu",
-              "gatewayUrl": "https://ariafinabpmsagent-bpmsgateway-dntrqz92tu.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp",
+            "BPMSGatewayAuth": {
+              "gatewayId": "ariafinabpmsagent-bpmsgatewayauth-zmbixotlun",
+              "gatewayArn": "arn:aws:bedrock-agentcore:us-east-1:145405817802:gateway/ariafinabpmsagent-bpmsgatewayauth-zmbixotlun",
+              "gatewayUrl": "https://ariafinabpmsagent-bpmsgatewayauth-zmbixotlun.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp",
               "targets": {
                 "cerrar-tarea": {
-                  "targetId": "VXS9VMA5UD"
+                  "targetId": "EFV8J4XFQB"
                 },
                 "identificar-tipo-documental": {
-                  "targetId": "L13QF4Q2UB"
+                  "targetId": "SUU2JUWXX3"
                 },
                 "consultar-estado-proceso": {
-                  "targetId": "DLMQGJ8SRT"
+                  "targetId": "BVZPSDMFAL"
                 }
               }
             }
           }
         },
         "stackName": "AgentCore-ariafinabpmsagent-default",
-        "deployHash": "0f94af82845b9a5e"
+        "deployHash": "89d3cfd8eeff50aa"
       }
     }
   }

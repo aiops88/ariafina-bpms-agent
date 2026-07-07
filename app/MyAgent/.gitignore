@@ -40,6 +40,9 @@ env/
 # Lockfile (regenerable)
 uv.lock
 
+# Lambda deployment artifacts
+*.zip
+
 # OS
 .DS_Store
 Thumbs.db
