@@ -29,7 +29,39 @@
   "credentials": [],
   "evaluators": [],
   "onlineEvalConfigs": [],
-  "agentCoreGateways": [],
+  "agentCoreGateways": [
+    {
+      "name": "BPMSGateway",
+      "description": "Gateway para herramientas BPMS de Ariafina - consulta de procesos, tipología documental y cierre de tareas",
+      "protocolType": "MCP",
+      "targets": [
+        {
+          "name": "consultar-estado-proceso",
+          "targetType": "lambdaFunctionArn",
+          "lambdaFunctionArn": {
+            "lambdaArn": "arn:aws:lambda:us-east-1:145405817802:function:consultar_estado_proceso",
+            "toolSchemaFile": "app/MyAgent/lambdas/schemas/consultar_estado_proceso.json"
+          }
+        },
+        {
+          "name": "identificar-tipo-documental",
+          "targetType": "lambdaFunctionArn",
+          "lambdaFunctionArn": {
+            "lambdaArn": "arn:aws:lambda:us-east-1:145405817802:function:identificar_tipo_documental",
+            "toolSchemaFile": "app/MyAgent/lambdas/schemas/identificar_tipo_documental.json"
+          }
+        },
+        {
+          "name": "cerrar-tarea",
+          "targetType": "lambdaFunctionArn",
+          "lambdaFunctionArn": {
+            "lambdaArn": "arn:aws:lambda:us-east-1:145405817802:function:cerrar_tarea",
+            "toolSchemaFile": "app/MyAgent/lambdas/schemas/cerrar_tarea.json"
+          }
+        }
+      ]
+    }
+  ],
   "policyEngines": [],
   "configBundles": [],
   "abTests": [],

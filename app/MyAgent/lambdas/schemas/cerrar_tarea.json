@@ -1,0 +1,22 @@
+{
+  "toolDefinitions": [
+    {
+      "name": "cerrar_tarea",
+      "description": "Cierra (completa) una tarea pendiente en el flujo de trabajo del BPMS. Devuelve confirmación con fecha y usuario de cierre.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tarea_id": {
+            "type": "string",
+            "description": "Identificador único de la tarea a cerrar (ej: TASK-5012)"
+          },
+          "comentario": {
+            "type": "string",
+            "description": "Comentario o nota de cierre (opcional)"
+          }
+        },
+        "required": ["tarea_id"]
+      }
+    }
+  ]
+}
