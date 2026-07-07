@@ -1,18 +1,16 @@
-{
-  "toolDefinitions": [
-    {
-      "name": "consultar_estado_proceso",
-      "description": "Consulta el estado actual de una instancia de proceso en el BPMS. Devuelve etapa, responsable, fechas y porcentaje de progreso.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "proceso_id": {
-            "type": "string",
-            "description": "Identificador único de la instancia de proceso (ej: PROC-2024-001)"
-          }
-        },
-        "required": ["proceso_id"]
-      }
+[
+  {
+    "name": "consultar_estado_proceso",
+    "description": "Consulta el estado actual de una instancia de proceso en el BPMS. Devuelve etapa, responsable, fechas y porcentaje de progreso.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "proceso_id": {
+          "type": "string",
+          "description": "Identificador único de la instancia de proceso (ej: PROC-2024-001)"
+        }
+      },
+      "required": ["proceso_id"]
     }
-  ]
-}
+  }
+]

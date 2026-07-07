@@ -18,13 +18,7 @@
       "protocol": "HTTP"
     }
   ],
-  "memories": [
-    {
-      "name": "MyAgentMemory",
-      "eventExpiryDuration": 30,
-      "strategies": []
-    }
-  ],
+  "memories": [],
   "knowledgeBases": [],
   "credentials": [],
   "evaluators": [],

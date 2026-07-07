@@ -1,22 +1,20 @@
-{
-  "toolDefinitions": [
-    {
-      "name": "identificar_tipo_documental",
-      "description": "Identifica el tipo documental apropiado según la descripción del documento o caso. Devuelve tipología, serie, subserie y política de retención.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "descripcion": {
-            "type": "string",
-            "description": "Descripción del documento o contexto del trámite"
-          },
-          "caso_id": {
-            "type": "string",
-            "description": "Identificador del caso asociado (opcional)"
-          }
+[
+  {
+    "name": "identificar_tipo_documental",
+    "description": "Identifica el tipo documental apropiado según la descripción del documento o caso. Devuelve tipología, serie, subserie y política de retención.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "descripcion": {
+          "type": "string",
+          "description": "Descripción del documento o contexto del trámite"
         },
-        "required": ["descripcion"]
-      }
+        "caso_id": {
+          "type": "string",
+          "description": "Identificador del caso asociado (opcional)"
+        }
+      },
+      "required": ["descripcion"]
     }
-  ]
-}
+  }
+]
